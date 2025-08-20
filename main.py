@@ -2,6 +2,14 @@ import mimetypes
 import pathlib
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import urllib.parse
+from pathlib import Path
+import json
+from datetime import datetime
+
+BASE_DIR = Path(__file__).parent.resolve()
+TEMPLATES_DIR = BASE_DIR / 'templates'
+STORAGE_DIR = BASE_DIR / 'storage'
+DATA_FILE = STORAGE_DIR / 'data.json'
 
 
 class HttpHandler(BaseHTTPRequestHandler):
@@ -19,14 +27,14 @@ class HttpHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         pr_url = urllib.parse.urlparse(self.path)
         if pr_url.path == '/':
-            self.send_html_file('index.html')
+            self.send_html_file(TEMPLATES_DIR / 'index.html')
         elif pr_url.path == '/message':
-            self.send_html_file('message.html')
+            self.send_html_file(TEMPLATES_DIR /'message.html')
         else:
             if pathlib.Path().joinpath(pr_url.path[1:]).exists():
                 self.send_static()
             else:
-                self.send_html_file('error.html', 404)
+                self.send_html_file(TEMPLATES_DIR / 'error.html', 404)
 
     def send_html_file(self, filename, status=200):
         self.send_response(status)
@@ -38,6 +46,7 @@ class HttpHandler(BaseHTTPRequestHandler):
     def send_static(self):
         self.send_response(200)
         mt = mimetypes.guess_type(self.path)
+        print(mt)
         if mt:
             self.send_header("Content-type", mt[0])
         else:
@@ -45,6 +54,29 @@ class HttpHandler(BaseHTTPRequestHandler):
         self.end_headers()
         with open(f'.{self.path}', 'rb') as file:
             self.wfile.write(file.read())
+
+    def save_to_json(self, data_to_save):
+        """
+        Додає нові дані до JSON-файлу, створюючи його, якщо він не існує.
+        """
+        STORAGE_DIR.mkdir(exist_ok=True)
+        
+        timestamp = datetime.now().isoformat()
+        formatted_data = {timestamp: data_to_save}
+
+        if DATA_FILE.exists():
+            with open(DATA_FILE, 'r', encoding='utf-8') as f:
+                try:
+                    existing_data = json.load(f)
+                except json.JSONDecodeError:
+                    existing_data = {}
+        else:
+            existing_data = {}
+            
+        existing_data.update(formatted_data)
+        
+        with open(DATA_FILE, 'w', encoding='utf-8') as f:
+            json.dump(existing_data, f, indent=4, ensure_ascii=False)
 
 
 def run(server_class=HTTPServer, handler_class=HttpHandler):
