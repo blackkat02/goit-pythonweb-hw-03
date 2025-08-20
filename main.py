@@ -20,6 +20,8 @@ class HttpHandler(BaseHTTPRequestHandler):
         print(data_parse)
         data_dict = {key: value for key, value in [el.split('=') for el in data_parse.split('&')]}
         print(data_dict)
+
+        self.save_to_json(data_dict)
         self.send_response(302)
         self.send_header('Location', '/')
         self.end_headers()
@@ -56,27 +58,23 @@ class HttpHandler(BaseHTTPRequestHandler):
             self.wfile.write(file.read())
 
     def save_to_json(self, data_to_save):
-        """
-        Додає нові дані до JSON-файлу, створюючи його, якщо він не існує.
-        """
-        STORAGE_DIR.mkdir(exist_ok=True)
-        
-        timestamp = datetime.now().isoformat()
-        formatted_data = {timestamp: data_to_save}
+      """Додає дані до JSON-файлу, створюючи його, якщо він не існує."""
+      STORAGE_DIR.mkdir(exist_ok=True)
 
-        if DATA_FILE.exists():
-            with open(DATA_FILE, 'r', encoding='utf-8') as f:
-                try:
-                    existing_data = json.load(f)
-                except json.JSONDecodeError:
-                    existing_data = {}
-        else:
-            existing_data = {}
-            
-        existing_data.update(formatted_data)
-        
-        with open(DATA_FILE, 'w', encoding='utf-8') as f:
-            json.dump(existing_data, f, indent=4, ensure_ascii=False)
+      # Читаємо файл або створюємо порожній словник
+      try:
+          with open(DATA_FILE, 'r', encoding='utf-8') as f:
+              existing_data = json.load(f)
+      except (FileNotFoundError, json.JSONDecodeError):
+          existing_data = {}
+
+      # Додаємо новий запис з міткою часу
+      existing_data[datetime.now().isoformat()] = data_to_save
+
+      # Записуємо назад у файл
+      with open(DATA_FILE, 'w', encoding='utf-8') as f:
+          json.dump(existing_data, f, indent=4, ensure_ascii=False)
+
 
 
 def run(server_class=HTTPServer, handler_class=HttpHandler):
