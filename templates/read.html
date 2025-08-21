@@ -30,7 +30,10 @@
                 <a class="nav-link active" aria-current="page" href="#">Home</a>
               </li>
               <li class="nav-item">
-                <a class="nav-link" href="/templates/message.html">Send message</a>
+                <a class="nav-link" href="/message.html">Send message</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Show message</a>
               </li>
             </ul>
           </div>
@@ -47,11 +50,17 @@
     </header>
     <main class="container">
       <body>
-        <ul>
-            {% for message in messages -%}
-            <li>{{ message.name }} {{ message.age }} {{ message.age }}</li>
-            {% endfor %}
-        </ul>
+        <div class="container">
+          <h1>Saved messages</h1>
+          {% for timestamp, message in messages.items() %}
+          <div class="message-card">
+              <p><strong>Date:</strong> {{ timestamp }}</p>
+              <p><strong>User:</strong> {{ message.username }}</p>
+              <p><strong>Message:</strong> {{ message.message }}</p>
+          </div>
+          {% endfor %}
+          <a href="/" class="button">Повернутися</a>
+        </div>
       </body>
     </main>
   </body>
