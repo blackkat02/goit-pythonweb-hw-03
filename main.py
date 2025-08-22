@@ -124,8 +124,7 @@ class HttpHandler(BaseHTTPRequestHandler):
             existing_data = {}
 
         # Add new record with timestamp
-        existing_data[datetime.now().isoformat()] = data_to_save
-
+        existing_data[datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")] = data_to_save
         # Write back to file
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, indent=4, ensure_ascii=False)

@@ -50,7 +50,7 @@ Option 2: Using Docker
 
 2. Run the container:
 
-  docker run -p 3000:3000 goit-pythonweb-hw-03
+  docker run -p 3000:3000 --rm goit-pythonweb-hw-03
 
 3. Open your web browser and navigate to http://localhost:3000.
 
