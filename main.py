@@ -36,8 +36,8 @@ class HttpHandler(BaseHTTPRequestHandler):
             self.send_html_file(TEMPLATES_DIR / 'message.html')
         elif pr_url.path == '/read':
           print(222)
+          self.render_html_with_data( 'read.html')
           # self.render_html_with_data(TEMPLATES_DIR / 'read.html')
-          self.render_html_with_data(str(TEMPLATES_DIR / 'read.html'))
         else:
             if pathlib.Path().joinpath(pr_url.path[1:]).exists():
                 self.send_static()
@@ -55,6 +55,7 @@ class HttpHandler(BaseHTTPRequestHandler):
         """
         Відправляє HTML-файл клієнту, згенерований Jinja2 з даними.
         """
+        print("000")
         self.send_response(status)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
@@ -68,6 +69,7 @@ class HttpHandler(BaseHTTPRequestHandler):
                 except json.JSONDecodeError:
                     messages = {}
 
+        print(filename)
         # Рендеримо шаблон з даними
         template = jinja_env.get_template(filename)
         print(filename)
